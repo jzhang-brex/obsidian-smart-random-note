@@ -31,5 +31,17 @@ export class SmartRandomNoteSettingTab extends PluginSettingTab {
                 toggle.setValue(this.plugin.settings.enableRibbonIcon);
                 toggle.onChange(this.plugin.setEnableRibbonIcon);
             });
+
+        new Setting(containerEl)
+            .setName('Excluding Tags')
+            .setDesc(
+                'Notes contains any of these tags will be excluded by the "Open Random Note Excluding Certain Tags" command. ' +
+                    'A tag should starts with #. Multiple tags should be separated by a comma.',
+            )
+            .addText((text) => {
+                text.setValue(this.plugin.settings.excludedTags).onChange(async (value) => {
+                    await this.plugin.setExcludedTags(value)
+                });
+            });
     }
 }

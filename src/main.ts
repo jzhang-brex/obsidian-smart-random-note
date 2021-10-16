@@ -1,12 +1,12 @@
 import { MarkdownView, Plugin, TFile } from 'obsidian';
-import { getTagFilesMap, randomElement } from './utilities';
+import { getTagFilesMap, getCachedTags, randomElement } from './utilities';
 import { SmartRandomNoteSettingTab } from './settingTab';
 import { SearchView, SmartRandomNoteSettings } from './types';
 import { SmartRandomNoteNotice } from './smartRandomNoteNotice';
 import { OpenRandomTaggedNoteModal } from './openRandomTaggedNoteModal';
 
 export default class SmartRandomNotePlugin extends Plugin {
-    settings: SmartRandomNoteSettings = { openInNewLeaf: true, enableRibbonIcon: true };
+    settings: SmartRandomNoteSettings = { openInNewLeaf: true, enableRibbonIcon: true, excludedTags: "" };
     ribbonIconEl: HTMLElement | undefined = undefined;
 
     async onload(): Promise<void> {
@@ -39,6 +39,12 @@ export default class SmartRandomNotePlugin extends Plugin {
             name: 'Insert Link at Cursor to Random Note from Search',
             callback: this.handleInsertLinkFromSearch,
         });
+
+        this.addCommand({
+            id: 'open-random-note-excluding-tags',
+            name: 'Open Random Note Excluding Certain Tags',
+            callback: this.handleOpenRandomNoteExcludingTags,
+        });
     }
 
     onunload = (): void => {
@@ -63,6 +69,36 @@ export default class SmartRandomNotePlugin extends Plugin {
         };
 
         modal.open();
+    };
+
+    handleOpenRandomNoteExcludingTags = (): void => {
+        const metadataCache = this.app.metadataCache;
+        const markdownFiles = this.app.vault.getMarkdownFiles();
+
+        const candidateFiles = [];
+
+        const excludedTags =
+            this.settings.excludedTags
+                .split(',')
+                .map((v) => v.trim())
+                .filter((v) => v.startsWith('#') && v.length > 1);
+
+        for (const markdownFile of markdownFiles) {
+            // Skip empty files
+            if (markdownFile.stat.size === 0) {
+                continue;
+            }
+
+            const cachedMetadata = metadataCache.getFileCache(markdownFile);
+            if (cachedMetadata) {
+                const cachedTags = getCachedTags(cachedMetadata);
+                if (cachedTags.length === 0 || cachedTags.every((tag) => excludedTags.indexOf(tag) < 0)) {
+                    candidateFiles.push(markdownFile);
+                }
+            }
+        }
+
+        this.openRandomNote(candidateFiles);
     };
 
     handleOpenRandomNoteFromSearch = async (): Promise<void> => {
@@ -141,6 +177,7 @@ export default class SmartRandomNotePlugin extends Plugin {
         if (loadedSettings) {
             this.setOpenInNewLeaf(loadedSettings.openInNewLeaf);
             this.setEnableRibbonIcon(loadedSettings.enableRibbonIcon);
+            this.setExcludedTags(loadedSettings.excludedTags);
         } else {
             this.refreshRibbonIcon();
         }
@@ -166,5 +203,10 @@ export default class SmartRandomNotePlugin extends Plugin {
                 this.handleOpenRandomNoteFromSearch,
             );
         }
+    };
+
+    async setExcludedTags(value: string): Promise<void> {
+        this.settings.excludedTags = value;
+        await this.saveData(this.settings);
     };
 }
