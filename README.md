@@ -1,6 +1,11 @@
 ![Downloads](https://img.shields.io/github/downloads/erichalldev/obsidian-smart-random-note/total.svg)
 
-# Smart Random Note Obsidian Plugin
+# Supercharged Random Note Obsidian Plugin
+
+This is forked from
+[erichalldev/obsidian-smart-random-note](https://github.com/erichalldev/obsidian-smart-random-note).
+I've made in PR in Nov 2021 but Eric doesn't reply to me so I decided to make
+improvement on my own.
 
 This plugin enhances opening random notes.
 
@@ -37,6 +42,17 @@ From Obsidian 0.9.8, you can activate this plugin within Obsidian by doing the f
 ## Compatibility
 
 Custom plugins are officially supported in Obsidian version 0.9.7. This plugin currently targets API version 0.9.15 but should be compatible with version 0.9.7 or higher.
+
+## Devlopment
+
+```bash
+npm install
+npm run dev
+```
+
+## Known Issue
+
+- If frontmatter contains multiple tags (e.g. `tag: foo, bar`), this plugin treat it as one tag (e.g. "foo, bar").
 
 ## Version History
 
