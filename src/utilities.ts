@@ -27,9 +27,20 @@ export function getTagFilesMap(app: App): TagFilesMap {
     return tagFilesMap;
 }
 
+/*
+ * splitFrontmatterTags('foo, bar,buz') => ['foo', 'bar', 'buz']
+ */
+function splitFrontmatterTags(tagsStr: string | string[]) : string[] {
+	if (typeof tagsStr == 'string') {
+		return tagsStr.split(/,[ ]*/);
+	}
+	return tagsStr;
+}
+
+
 function getCachedTags(cachedMetadata: CachedMetadata): string[] {
     const bodyTags: string[] = cachedMetadata.tags?.map((x) => x.tag) || [];
-    const frontMatterTags: string[] = cachedMetadata.frontmatter?.tags || cachedMetadata.frontmatter?.tag || [];
+    const frontMatterTags: string[] = splitFrontmatterTags(cachedMetadata.frontmatter?.tags || cachedMetadata.frontmatter?.tag || []);
 
     // frontmatter tags might not have a hashtag in front of them
     const cachedTags = bodyTags.concat(frontMatterTags).map((x) => (x.startsWith('#') ? x : '#' + x));
