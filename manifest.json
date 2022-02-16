@@ -1,10 +1,9 @@
 {
-  "id": "smart-random-note",
-  "name": "Smart Random Note",
+  "id": "supercharged-random-note",
+  "name": "Supercharged Random Note",
   "version": "0.2.1",
   "minAppVersion": "0.9.18",
-  "description": "A smart random note plugin",
-  "author": "Eric Hall",
-  "authorUrl": "https://erichall.io",
+  "description": "A supercharged random note plugin",
+  "author": "Jiaming Zhang",
   "isDesktopOnly": false
 }
