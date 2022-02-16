@@ -28,6 +28,13 @@ export default class SmartRandomNotePlugin extends Plugin {
             callback: this.handleOpenTaggedRandomNote,
         });
 
+		// TODO(jiamingz): Find a way to dynamically do this
+        this.addCommand({
+            id: 'open-tagged-random-note-jp',
+            name: 'Open Tagged Random Note with Tag #jp',
+            callback: () => this.handleOpenTaggedRandomNoteWithTag("#jp"),
+        });
+
         this.addCommand({
             id: 'open-random-note-from-search',
             name: 'Open Random Note from Search',
@@ -63,6 +70,18 @@ export default class SmartRandomNotePlugin extends Plugin {
         };
 
         modal.open();
+    };
+
+    handleOpenTaggedRandomNoteWithTag = async (selectedTag: string): Promise<void> => {
+        const tagFilesMap = getTagFilesMap(this.app);
+        const tags = Object.keys(tagFilesMap);
+
+		// If selectedTags = "foo" and there are tags "foo", "bar", "foo/bar", expandedTags is ["foo", "foo/bar"]
+		const expandedTags = tags.filter(tag => tag == selectedTag || tag.startsWith(selectedTag + "/"));
+
+		// Assume no notes will write things like `tag: foo, foo/bar`
+		const taggedFiles = expandedTags.map(t => tagFilesMap[t]).flat();
+		this.openRandomNote(taggedFiles);
     };
 
     handleOpenRandomNoteFromSearch = async (): Promise<void> => {
