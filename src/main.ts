@@ -80,7 +80,7 @@ export default class SmartRandomNotePlugin extends Plugin {
 		const expandedTags = tags.filter(tag => tag == selectedTag || tag.startsWith(selectedTag + "/"));
 
 		// Assume no notes will write things like `tag: foo, foo/bar`
-		const taggedFiles = expandedTags.map(t => tagFilesMap[t]).flat();
+		const taggedFiles = this.flatten(expandedTags.map(t => tagFilesMap[t]));
 		this.openRandomNote(taggedFiles);
     };
 
@@ -186,4 +186,8 @@ export default class SmartRandomNotePlugin extends Plugin {
             );
         }
     };
+
+	flatten = <T>(arrOfArrays : T[][]): T[] => {
+		return arrOfArrays.reduce((accumulator, value) => accumulator.concat(value), [])
+	}
 }
