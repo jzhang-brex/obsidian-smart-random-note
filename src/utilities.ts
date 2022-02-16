@@ -37,10 +37,15 @@ function splitFrontmatterTags(tagsStr: string | string[]) : string[] {
 	return tagsStr;
 }
 
+function containsTemplaterToken(tag: string) : boolean {
+	return tag.startsWith("<%") && tag.endsWith("%>");
+}
 
 function getCachedTags(cachedMetadata: CachedMetadata): string[] {
     const bodyTags: string[] = cachedMetadata.tags?.map((x) => x.tag) || [];
-    const frontMatterTags: string[] = splitFrontmatterTags(cachedMetadata.frontmatter?.tags || cachedMetadata.frontmatter?.tag || []);
+    const frontMatterTags: string[] = 
+		splitFrontmatterTags(cachedMetadata.frontmatter?.tags || cachedMetadata.frontmatter?.tag || [])
+			.filter(tag => !containsTemplaterToken(tag));
 
     // frontmatter tags might not have a hashtag in front of them
     const cachedTags = bodyTags.concat(frontMatterTags).map((x) => (x.startsWith('#') ? x : '#' + x));
