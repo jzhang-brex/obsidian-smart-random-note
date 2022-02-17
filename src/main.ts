@@ -1,5 +1,5 @@
 import { MarkdownView, Plugin, TFile } from 'obsidian';
-import { getTagFilesMap, randomElement } from './utilities';
+import { getTagFilesMap, randomElement, flatten, getChildrenTagsAndItself } from './utilities';
 import { SmartRandomNoteSettingTab } from './settingTab';
 import { SearchView, SmartRandomNoteSettings } from './types';
 import { SmartRandomNoteNotice } from './smartRandomNoteNotice';
@@ -77,10 +77,10 @@ export default class SmartRandomNotePlugin extends Plugin {
         const tags = Object.keys(tagFilesMap);
 
 		// If selectedTags = "foo" and there are tags "foo", "bar", "foo/bar", expandedTags is ["foo", "foo/bar"]
-		const expandedTags = tags.filter(tag => tag == selectedTag || tag.startsWith(selectedTag + "/"));
+		const expandedTags = getChildrenTagsAndItself(selectedTag, tags);
 
 		// Assume no notes will write things like `tag: foo, foo/bar`
-		const taggedFiles = this.flatten(expandedTags.map(t => tagFilesMap[t]));
+		const taggedFiles = flatten(expandedTags.map(t => tagFilesMap[t]));
 		this.openRandomNote(taggedFiles);
     };
 
@@ -186,8 +186,4 @@ export default class SmartRandomNotePlugin extends Plugin {
             );
         }
     };
-
-	flatten = <T>(arrOfArrays : T[][]): T[] => {
-		return arrOfArrays.reduce((accumulator, value) => accumulator.concat(value), [])
-	}
 }

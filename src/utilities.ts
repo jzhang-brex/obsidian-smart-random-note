@@ -56,3 +56,12 @@ function getCachedTags(cachedMetadata: CachedMetadata): string[] {
 export function randomElement<T>(array: T[]): T {
     return array[(array.length * Math.random()) << 0];
 }
+
+export function flatten<T>(arrOfArrays : T[][]): T[] {
+	return arrOfArrays.reduce((accumulator, value) => accumulator.concat(value), []);
+}
+
+// If selectedTags = "foo" and allTags = ["foo", "bar", "foo/bar"], returns ["foo", "foo/bar"]
+export function getChildrenTagsAndItself(selectedTag: string, allTags: string[]): string[] {
+	return allTags.filter(tag => tag == selectedTag || tag.startsWith(selectedTag + "/"));
+}
