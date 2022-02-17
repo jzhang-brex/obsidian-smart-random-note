@@ -1,4 +1,4 @@
-import { App, CachedMetadata } from 'obsidian';
+import { TFile, App, CachedMetadata } from 'obsidian';
 import { TagFilesMap } from './types';
 
 export function getTagFilesMap(app: App): TagFilesMap {
@@ -57,11 +57,34 @@ export function randomElement<T>(array: T[]): T {
     return array[(array.length * Math.random()) << 0];
 }
 
-export function flatten<T>(arrOfArrays : T[][]): T[] {
-	return arrOfArrays.reduce((accumulator, value) => accumulator.concat(value), []);
+// If selectedTags = "foo" and allTags = ["foo", "bar", "foo/bar"], returns ["foo", "foo/bar"]
+function getChildrenTagsAndItself(selectedTag: string, allTags: string[]): string[] {
+	return allTags.filter(tag => tag == selectedTag || tag.startsWith(selectedTag + "/"));
 }
 
-// If selectedTags = "foo" and allTags = ["foo", "bar", "foo/bar"], returns ["foo", "foo/bar"]
-export function getChildrenTagsAndItself(selectedTag: string, allTags: string[]): string[] {
-	return allTags.filter(tag => tag == selectedTag || tag.startsWith(selectedTag + "/"));
+export function getFilesByTag(selectedTag: string, tagFilesMap: TagFilesMap):  TFile[] {
+	const tags = Object.keys(tagFilesMap);
+	// If selectedTags = "foo" and there are tags "foo", "bar", "foo/bar", expandedTags is ["foo", "foo/bar"]
+	const expandedTags = getChildrenTagsAndItself(selectedTag, tags);
+	return expandedTags.map(t => tagFilesMap[t]).flat();
+}
+
+export function findSetIntersection(filesGroups: TFile[][]): TFile[] {
+	if  (filesGroups.length == 0) {
+		return [];
+	}
+
+	if  (filesGroups.length == 1) {
+		return filesGroups[0];
+	}
+
+	// Sort filesGroup in place using length in asc  order
+	const sortedFilesGroups = [...filesGroups];
+	sortedFilesGroups.sort((a,b) => (a.length < b.length ? -1 : 1));
+
+	const sets = filesGroups.slice(1).map(files => {
+		return new Set(files.map(f => f.path));
+	});
+
+	return sortedFilesGroups[0].filter(f => sets.every(s => s.has(f.path)));
 }

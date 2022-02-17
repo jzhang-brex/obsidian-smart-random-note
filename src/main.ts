@@ -1,5 +1,5 @@
 import { MarkdownView, Plugin, TFile } from 'obsidian';
-import { getTagFilesMap, randomElement, flatten, getChildrenTagsAndItself } from './utilities';
+import { getTagFilesMap, randomElement, getFilesByTag, findSetIntersection } from './utilities';
 import { SmartRandomNoteSettingTab } from './settingTab';
 import { SearchView, SmartRandomNoteSettings } from './types';
 import { SmartRandomNoteNotice } from './smartRandomNoteNotice';
@@ -32,7 +32,7 @@ export default class SmartRandomNotePlugin extends Plugin {
         this.addCommand({
             id: 'open-tagged-random-note-jp',
             name: 'Open Tagged Random Note with Tag #jp',
-            callback: () => this.handleOpenTaggedRandomNoteWithTag("#jp"),
+            callback: () => this.handleOpenTaggedRandomNoteWithTags(["#jp"]),
         });
 
         this.addCommand({
@@ -72,17 +72,15 @@ export default class SmartRandomNotePlugin extends Plugin {
         modal.open();
     };
 
-    handleOpenTaggedRandomNoteWithTag = async (selectedTag: string): Promise<void> => {
+    handleOpenTaggedRandomNoteWithTags = async (selectedTags: string[]): Promise<void> => {
         const tagFilesMap = getTagFilesMap(this.app);
-        const tags = Object.keys(tagFilesMap);
-
-		// If selectedTags = "foo" and there are tags "foo", "bar", "foo/bar", expandedTags is ["foo", "foo/bar"]
-		const expandedTags = getChildrenTagsAndItself(selectedTag, tags);
 
 		// Assume no notes will write things like `tag: foo, foo/bar`
-		const taggedFiles = flatten(expandedTags.map(t => tagFilesMap[t]));
-		this.openRandomNote(taggedFiles);
+		const taggedFiles = selectedTags.map(t => getFilesByTag(t, tagFilesMap));
+		this.openRandomNote(findSetIntersection(taggedFiles));
     };
+
+
 
     handleOpenRandomNoteFromSearch = async (): Promise<void> => {
         const searchView = this.app.workspace.getLeavesOfType('search')[0]?.view as SearchView;
